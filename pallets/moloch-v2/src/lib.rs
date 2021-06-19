@@ -198,7 +198,7 @@ decl_error! {
 		NotMember,
 		NotStandardProposal,
 		NotKickProposal,
-		NotProposalApplicant,
+		NotProposalProposer,
 		SharesOverFlow,
 		ProposalNotExist,
 		ProposalNotStart,
@@ -318,8 +318,9 @@ decl_module! {
 			// check proposal status
 			ensure!(!proposal.flags[0], Error::<T>::ProposalHasSponsored);
 			ensure!(!proposal.flags[3], Error::<T>::ProposalHasAborted);
-			if Members::<T>::contains_key(proposal.applicant.clone()) {
-				ensure!(Members::<T>::get(proposal.applicant.clone()).jailed_at == 0, Error::<T>::MemberInJail);
+			// reject in jailed memeber to process
+			if Members::<T>::contains_key(who.clone()) {
+				ensure!(Members::<T>::get(who.clone()).jailed_at == 0, Error::<T>::MemberInJail);
 			}
 
 			// collect proposal deposit from proposer and store it in the Moloch until the proposal is processed
@@ -550,7 +551,8 @@ decl_module! {
 			let _usize_proposal_index = TryInto::<usize>::try_into(proposal_index).ok().unwrap();
 			let proposal_id = ProposalQueue::get()[_usize_proposal_index];
 			let proposal = &mut Proposals::<T>::get(proposal_id);
-			ensure!(who == proposal.applicant, Error::<T>::NotProposalApplicant);
+			ensure!(who == proposal.proposer, Error::<T>::NotProposalProposer);
+			ensure!(!proposal.flags[0], Error::<T>::ProposalHasSponsored);
 			ensure!(!proposal.flags[3], Error::<T>::ProposalHasAborted);
 			let token_to_abort = proposal.tribute_offered;
 			proposal.tribute_offered = 0;
@@ -559,7 +561,7 @@ decl_module! {
 			// need to mutate for update
 			Proposals::<T>::insert(proposal_id, proposal.clone());
 			// return the token to applicant and delete record
-			let _ = T::Currency::transfer(&Self::custody_account(),  &proposal.applicant, Self::u128_to_balance(token_to_abort), AllowDeath);
+			let _ = T::Currency::transfer(&Self::custody_account(),  &proposal.proposer, Self::u128_to_balance(token_to_abort), AllowDeath);
 
 			Self::deposit_event(RawEvent::Abort(proposal_index, who.clone()));
 			Ok(())
