@@ -1,7 +1,7 @@
 ### Build
 
 Run `cargo +nightly build --release`  
-Then run `./target/release/node-template --dev`
+Then run `./target/release/dora-moloch --dev`
 
 ### Test
 
@@ -14,23 +14,20 @@ Or if you want to test on your local machine, ust choose local node.
 - period_duration, timing unit in seconds, for test you can set it to 120.  
 - voting_period_length, number of periods for voting, after that you can not vote anymore.  
 - grace_period_length, number of periods for silencing next behind voting, in case any member `ragequit`.  
-- abort_window, number of periods to abort, after this window, no permission to abort.  
 - proposal_deposit, tokens to deposit when member proposed a proposal.
 - proposal_reward, tokens will be distributed to anyone processed a proposal, this will be deducted from proposer's deposit, so it's NOT greater than proposal_deposit
 ![alt summon](images/summon.png)
 
-4. `custody`, applicants tansfer token_tribute to the custody account. The applicant can not get proposed until finishing this.
-- token_tribute, number of tokens to request shares in the future, DO NOT tansfer less/more.  
-Below is an example shows an example that we pay a tribute of 2000 DORA
-![alt custody](images/custody.png)
-After submitting transactions, you can navigate to Network->Explorer to see the events, you can copy the custody account and save it in your address book so that you can view balances.
-![alt custody-account](images/custody-account.png)
-![alt address-book](images/address-book.png)
-
-5. `submit_proposal`, propose one member, define the shares and tribute. Make sure the applicant desopsit corresponding token to our custody account.
-- token_tribute, amount of token desposit in custody account, which will be transfered into GuildBank if proposal gets passed.
-- shared_requests, shares to mint.
+4. `submit_proposal`, propose a proposal, define the shares and tribute. The proposal can be requesting shares or loot, or get payed from the pool
+- tribute_offered, amount of token desposit in custody account, which will be transfered into GuildBank if proposal gets passed.
+- shares_requested, shares to mint.
+- loot_requested, loot to mint.
+- payment_requested, amount of token will be transfered to the applicant.
 ![alt submit-proposal](images/submit-proposal.png)
+
+5. `sponsor_proposal`, a member sponsor some proposal, only sponsored proposals can be voted.
+- proposal_index, the index of proposal queque
+![alt sponsor-proposal](images/sponsor-proposal.png)
 
 6. `submit_vote`, only member can vote a YES/NO to a proposal.
 - proposal_index, the index of proposal queque
@@ -47,13 +44,14 @@ After processing, Bob will become a member and Bob_Stash's balance increased 500
 ![alt bob](images/bob.png)
 ![alt member](images/member.png)
 
-8. `abort`, the applicant can abort a proposal which is still in abort window.
+8. `abort`, the applicant can abort a proposal which is not sponsored yet.
 - proposal_index, the index of proposal queque
 We can use another account to custody some tokens and then ask member to propose. But this time, after submitted, we use this applicant to abort. In this way, we'll see applicant's balance remain the same, but member's deposit will NOT be returned.
 ![alt abort](images/abort.png)
 ![alt after-abort](images/after-abort.png)
-```NOTE: Aborted proposal also need to be processed``` 
 
-9. `ragequit`, the member can rage quit. This will burn some shares and return some token to the member.
-- shares_to_burn, the shares need to be burnt.
-Let's use Bob the burn 5 shares, thus remaining tokens in guildbank should be `(1+(10-5))/11 * 3000=1636.3636`. 
+9. `guild_kick`, someone can propose to kick some member, for this kind of proposal.
+- member_to_kick, the member to be kicked.
+![alt abort](images/guild-kick.png)
+After members voted and passed, the kicked member become in jailed. Although the member's still in group, but anyone can use `rage_kick` to remove him.
+![alt jailed-member](images/jailed-member.png)

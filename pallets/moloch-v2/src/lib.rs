@@ -547,6 +547,7 @@ decl_module! {
 		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
 		pub fn abort(origin, proposal_index: u128) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
+			ensure!(Proposals::<T>::contains_key(proposal_index), Error::<T>::ProposalNotExist);
 			let proposal = &mut Proposals::<T>::get(proposal_index);
 			ensure!(who == proposal.proposer, Error::<T>::NotProposalProposer);
 			ensure!(!proposal.flags[0], Error::<T>::ProposalHasSponsored);
