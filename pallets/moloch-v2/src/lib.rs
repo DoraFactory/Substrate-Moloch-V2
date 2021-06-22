@@ -547,10 +547,7 @@ decl_module! {
 		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
 		pub fn abort(origin, proposal_index: u128) -> dispatch::DispatchResult {
 			let who = ensure_signed(origin)?;
-			ensure!(proposal_index < ProposalQueue::get().len().try_into().unwrap(), Error::<T>::ProposalNotExist);
-			let _usize_proposal_index = TryInto::<usize>::try_into(proposal_index).ok().unwrap();
-			let proposal_id = ProposalQueue::get()[_usize_proposal_index];
-			let proposal = &mut Proposals::<T>::get(proposal_id);
+			let proposal = &mut Proposals::<T>::get(proposal_index);
 			ensure!(who == proposal.proposer, Error::<T>::NotProposalProposer);
 			ensure!(!proposal.flags[0], Error::<T>::ProposalHasSponsored);
 			ensure!(!proposal.flags[3], Error::<T>::ProposalHasAborted);
@@ -559,7 +556,7 @@ decl_module! {
 			proposal.flags[3] = true;
 
 			// need to mutate for update
-			Proposals::<T>::insert(proposal_id, proposal.clone());
+			Proposals::<T>::insert(proposal_index, proposal.clone());
 			// return the token to applicant and delete record
 			let _ = T::Currency::transfer(&Self::custody_account(),  &proposal.proposer, Self::u128_to_balance(token_to_abort), AllowDeath);
 
@@ -578,8 +575,8 @@ decl_module! {
 		pub fn rage_kick(origin, member_to_kick: T::AccountId) -> dispatch::DispatchResult {
 			let _ = ensure_signed(origin)?;
 			let member = Members::<T>::get(member_to_kick.clone());
-			ensure!(member.loot > 0, Error::<T>::NoEnoughLoot);
 			ensure!(member.jailed_at != 0, Error::<T>::MemberNotInJail);
+			ensure!(member.loot > 0, Error::<T>::NoEnoughLoot);
 			Self::member_quit(member_to_kick, 0, member.loot)
 		}
 	}

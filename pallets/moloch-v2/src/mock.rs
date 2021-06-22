@@ -132,7 +132,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	pallet_balances::GenesisConfig::<Test>{
 		// Total issuance will be 1000 with internal account initialized at ED.
-		balances: vec![(0, 1000), (1, 2000), (2, 3000), (3, 4000)],
+		balances: vec![(0, 3000), (1, 3000), (2, 3000), (3, 3000), (4, 3000), (5, 3000)],
 	}.assimilate_storage(&mut t).unwrap();
 	system::GenesisConfig::default().assimilate_storage::<Test>(&mut t).unwrap();
 	t.into()
