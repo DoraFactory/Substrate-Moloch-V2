@@ -418,3 +418,54 @@ fn rage_kick_failed() {
 		
 	});
 }
+
+#[test]
+fn update_delegate_validation() {
+	new_test_ext().execute_with(|| {
+		let initial_member = 1;
+		let delegate = 3;
+		summon_with(initial_member);
+		// anyone can call rage_kick
+		assert_noop!(
+			MolochV2::rage_kick(Origin::signed(0), 2),
+			Error::<Test>::MemberNotInJail
+		);
+		// submit a proposal
+		let tribute_offered = 50;
+		let shares_requested = 5;
+		let loot_requested = 0;
+		let payment_requested = 0;
+		let applicant = 2;
+		let detail = b"test_proposal".to_vec();
+		let proposal_idx = 0;
+
+		// a non-member can submit
+		assert_ok!(
+			MolochV2::submit_proposal(
+				Origin::signed(applicant), 
+				applicant, 
+				tribute_offered, 
+				shares_requested, 
+				loot_requested,
+				payment_requested, 
+				detail
+			)
+		);
+		// sponsor it
+		assert_ok!(MolochV2::sponsor_proposal(Origin::signed(initial_member), proposal_idx));
+		// set the timestamp to make voting period effect
+		let now = Timestamp::now();
+		let period_duration = TryInto::<u64>::try_into(MolochV2::period_duration() * 1000 * 2).ok().unwrap();
+		Timestamp::set_timestamp(now + period_duration);
+		
+		// change delegate
+		assert_ok!(MolochV2::update_delegate(Origin::signed(initial_member), delegate));
+		// negative case as the voting rights have been delegated
+		assert_noop!(
+			MolochV2::submit_vote(Origin::signed(initial_member), proposal_idx, 1),
+			Error::<Test>::NotMember
+		);
+		// positive case, use delegate to vote
+		assert_ok!(MolochV2::submit_vote(Origin::signed(delegate), proposal_idx, 1));
+	});
+}

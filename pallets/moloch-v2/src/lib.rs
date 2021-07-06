@@ -6,7 +6,7 @@
 /// debug guide https://substrate.dev/recipes/runtime-printing.html
 use frame_support::{
 	decl_module, decl_storage, decl_event, decl_error, dispatch, debug, ensure,
-	traits::{Currency, EnsureOrigin, ReservableCurrency, OnUnbalanced, Get, BalanceStatus, ExistenceRequirement::{KeepAlive, AllowDeath}},
+	traits::{Currency, EnsureOrigin, ReservableCurrency, OnUnbalanced, Get, ExistenceRequirement::{KeepAlive, AllowDeath}},
 };
 use sp_runtime::{ModuleId, traits::{ AccountIdConversion }};
 use frame_support::codec::{Encode, Decode};
@@ -572,6 +572,7 @@ decl_module! {
 			Self::member_quit(who, shares_to_burn, loot_to_burn)
 		}
 
+		/// kick anymember  in jail
 		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
 		pub fn rage_kick(origin, member_to_kick: T::AccountId) -> dispatch::DispatchResult {
 			let _ = ensure_signed(origin)?;
@@ -579,6 +580,25 @@ decl_module! {
 			ensure!(member.jailed_at != 0, Error::<T>::MemberNotInJail);
 			ensure!(member.loot > 0, Error::<T>::NoEnoughLoot);
 			Self::member_quit(member_to_kick, 0, member.loot)
+		}
+
+		/// update the delegate
+		#[weight = 10_000 + T::DbWeight::get().reads_writes(1,1)]
+		pub fn update_delegate(origin, delegate_key: T::AccountId) -> dispatch::DispatchResult {
+			let who = ensure_signed(origin)?;
+			// skip checks if member is setting the delegate key to their member address
+			if who != delegate_key {
+				ensure!(!Members::<T>::contains_key(delegate_key.clone()), Error::<T>::NoOverwriteMember);
+				let delegate = AddressOfDelegates::<T>::get(delegate_key.clone());
+				ensure!(!Members::<T>::contains_key(delegate.clone()), Error::<T>::NoOverwriteDelegate);
+			}
+
+			let member = &mut Members::<T>::get(who.clone());
+			AddressOfDelegates::<T>::remove(member.delegate_key.clone());
+			AddressOfDelegates::<T>::insert(delegate_key.clone(), who.clone());
+			member.delegate_key = delegate_key.clone();
+			Self::deposit_event(RawEvent::UpdateDelegateKey(who, delegate_key));
+			Ok(())
 		}
 	}
 }
