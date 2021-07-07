@@ -9,7 +9,7 @@ Then run `./target/release/dora-moloch --dev`
 ![alt add-settings](images/add-settings.png)
 2. Click the lef top icon to open settings and choose the custom node and input `wss://moloch-v2.tophacker.com/`, just like below
 ![alt select-node](images/select-node.png)
-Or if you want to test on your local machine, ust choose local node.
+Or if you want to test on your local machine, choose local node.
 3. `summon`, this is to set up initial configuration for your moloch DAO.  
 - period_duration, timing unit in seconds, for test you can set it to 120.  
 - voting_period_length, number of periods for voting, after that you can not vote anymore.  
@@ -25,6 +25,9 @@ Or if you want to test on your local machine, ust choose local node.
 - payment_requested, amount of token will be transfered to the applicant.
 ![alt submit-proposal](images/submit-proposal.png)
 
+  `submit_guild_kick_proposal`, propose a proposal to kick a member, just similar with previous one, anyone can submit a proposal.
+- member_to_kick, the accountId of members
+- details, description of this proposal
 5. `sponsor_proposal`, a member sponsor some proposal, only sponsored proposals can be voted.
 - proposal_index, the index of proposal queque
 ![alt sponsor-proposal](images/sponsor-proposal.png)
@@ -43,7 +46,7 @@ You can check that proposals have been update.
 After processing, Bob will become a member and Bob_Stash's balance increased 500 `DORA` which is just the amount of processing_reward.
 ![alt bob](images/bob.png)
 ![alt member](images/member.png)
-
+  `process_guild_kick_proposal`, for proposals to kick some member, must execute this otherwise it'll raise errors.
 8. `abort`, the applicant can abort a proposal which is not sponsored yet.
 - proposal_index, the index of proposal queque
 We can use another account to custody some tokens and then ask member to propose. But this time, after submitted, we use this applicant to abort. In this way, we'll see applicant's balance remain the same, but member's deposit will NOT be returned.
@@ -55,3 +58,6 @@ We can use another account to custody some tokens and then ask member to propose
 ![alt abort](images/guild-kick.png)
 After members voted and passed, the kicked member become in jailed. Although the member's still in group, but anyone can use `rage_kick` to remove him.
 ![alt jailed-member](images/jailed-member.png)
+
+10. `update_delegate`, delegate one member's voting rights to another account.
+- delegate, any account who can sumit vote on behalf of the member.
