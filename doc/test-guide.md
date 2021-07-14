@@ -1,11 +1,23 @@
 ### Build
 
-Run ```
-rustup toolchain add nightly-2020-10-05
-rustup target add wasm32-unknown-unknown --toolchain nightly-2020-10-05
-cargo +nightly-2020-10-05 build --release
-``` 
-Then run `./target/release/dora-moloch --dev`
+Run 
+> rustup toolchain add nightly-2020-10-05  
+> rustup target add wasm32-unknown-unknown --toolchain nightly-2020-10-05  
+> cargo +nightly-2020-10-05 build --release
+
+
+If you encountered errors like  ```
+error: The format for this attribute cannot be parsed. Correct format: `#[display(fmt = "...")]`
+  --> /hme/.cargo/registry/src/github.com-1ecc6299db9ec823/sc-finality-grandpa-0.8.1/src/authorities.rs:37:4
+   |
+37 |     #[display("Invalid authority set, either empty or with an authority weight set to 0.")]
+   |       ```
+You need to change the source code of grandpa crate manually, just edit the `authorities.rs` in path which is mentioned in errors, and then replace line 37 code with following
+`#[display(fmt = "Invalid authority set, either empty or with an authority weight set to 0.")].` Then you should be able to compile.
+> Notice: This is a version bug of sc-finality-grandpa, not fixed by parity yet. And we have no other optional versions to mitigate this.
+
+
+After build, run `./target/release/dora-moloch --dev`
 
 ### Test
 
