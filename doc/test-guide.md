@@ -1,6 +1,10 @@
 ### Build
 
-Run `cargo +nightly build --release`  
+Run ```
+rustup toolchain add nightly-2020-10-05
+rustup target add wasm32-unknown-unknown --toolchain nightly-2020-10-05
+cargo +nightly-2020-10-05 build --release
+``` 
 Then run `./target/release/dora-moloch --dev`
 
 ### Test

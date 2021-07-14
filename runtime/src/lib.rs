@@ -313,10 +313,10 @@ parameter_types! {
 	// HARD-CODED LIMITS
     // These numbers are quite arbitrary; they are small enough to avoid overflows when doing calculations
     // with periods or shares, yet big enough to not limit reasonable use cases.
-    pub const MaxVotingPeriodLength: u128 = 10_u128.pow(18); // maximum length of voting period
-    pub const MaxGracePeriodLength: u128 = 10_u128.pow(18); // maximum length of grace period
-    pub const MaxDilutionBound: u128 = 10_u128.pow(18); // maximum dilution bound
-    pub const MaxShares: u128 = 10_u128.pow(18); // maximum number of shares that can be minted
+    pub const MaxVotingPeriodLength: u128 = 1000_000_000_000_000_000; // maximum length of voting period
+    pub const MaxGracePeriodLength: u128 = 1000_000_000_000_000_000; // maximum length of grace period
+    pub const MaxDilutionBound: u128 = 1000_000_000_000_000_000; // maximum dilution bound
+    pub const MaxShares: u128 = 1000_000_000_000_000_000; // maximum number of shares that can be minted
 
 }
 
